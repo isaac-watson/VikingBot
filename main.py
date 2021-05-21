@@ -1,6 +1,7 @@
 import discord
 import json
 import os
+import speech_recoginition as SR
 from dotenv import load_dotenv
 
 load_dotenv()
