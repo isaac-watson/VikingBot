@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
+GTOKEN = os.getenv("GOOLE_API")
 
 bot = commands.Bot(command_prefix="$", description="A bot")
 
@@ -35,8 +36,14 @@ async def ping(ctx, arg):
 async def summon(ctx, *args):
     if (args != ()):
         try:
-            channel = bot.get_channel(channel_dict[args[0]])
-            await channel.connect()
+            if (ctx.voice_client is None):
+                channel = bot.get_channel(channel_dict[args[0]])
+                await channel.connect()
+            else:
+                await ctx.voice_client.disconnect()
+                channel = bot.get_channel(channel_dict[args[0]])
+                await channel.connect()
+
         except:
             await ctx.send("Channel does not exist or I'm banned " + find_emote(':sadge:'))
     else:
