@@ -8,6 +8,8 @@ name = "pypi"
 python-dotenv = "*"
 speechrecognition = "*"
 pynacl = "*"
+wheel = "*"
+setuptools = "*"
 
 [dev-packages]
 
