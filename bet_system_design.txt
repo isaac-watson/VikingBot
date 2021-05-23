@@ -25,3 +25,5 @@ after the results are in
 
 Users.json
 > Stores user id and how much money they have
+
+bot. variables to temporarily save data about a prediction.
