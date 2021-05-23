@@ -1,46 +1,47 @@
 import discord
+from discord.ext import commands
 import json
 import os
-import speech_recoginition as SR
+import speech_recognition as SR
 from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-client = discord.Client()
+bot = commands.Bot(command_prefix="$", description="A bot")
+channel_dict = {
+    'bot-voice': 845413017473515551,
+    'general' : 398673802537598977,
+    'general2' : 754202862959067236,
+    'waiting_room': 468587294450778114,
+    'quarantine' : 388179281446174721  
+    }
 
-@client.event
+@bot.event
 async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
+    print('We have logged in as ' + (bot.user.name))
+    
+@bot.command()
+async def ping(ctx, arg):
+    await ctx.send(arg)    
 
-@client.event
-async def on_message(message):
-    with open("users.json", "r") as f:
-        users = json.load(f)
-
-    user_id = str(message.author.id)
-
-    if message.author == client.user:
-        return
+@bot.command()
+async def summon(ctx, *args):
+    if (args != ''):
+        try:
+            channel = bot.get_channel(channel_dict[args])
+            await channel.connect()
+        except:
+            ctx.send("Channel does not exist or I'm banned :sadge:")
     else:
-        await update_data(users, user_id)
-    
-    if message.author.display_name == "OrnateGale":
-        emoji = client.get_emoji(718618579918127124)
-        await message.add_reaction(emoji)
+        try:
+            channel = ctx.author.voice.channel
+            await channel.connect()
+        except:
+            ctx.send("I'm banned :sadge:")
 
-    if message.content.startswith('$hello'):
-        await message.channel.send('Hello!')
-    
-    if message.content.startswith('::bank'):
-        await message.channel.send('You have ' + '${:,}'.format((users[user_id]["money"])))
+@bot.command()
+async def banish(ctx):
+    await ctx.voice_client.disconnect()
 
-    with open("users.json", "w") as f:
-        json.dump(users, f)
-
-async def update_data(users, user_id):
-    if not user_id in users:
-        users[user_id] = {}
-        users[user_id]["money"] = 0       
-
-client.run(TOKEN)
+bot.run(TOKEN)
