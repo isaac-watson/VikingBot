@@ -1,0 +1,27 @@
+open pred with a string as argument
+if a pred is open already > do nothing
+if a pred is not open already > open pred
+
+if a pred is open
+> send message to set the options to bet on (only 2)
+> ::choice1 to set the first choice
+> ::choice2 to set the second choice
+    > both choice commands use a string as argument, like ::openpred
+> can't bet on pred til the pred opener set both choices
+
+if both pred choices are set
+> users can now bet on the choices they want
+    > ::bet choice# amount#
+        > choice# has to be 1 or 2
+        > amount# has to be a valid amount that the user has
+> if a user has bet on choice 1, they can't bet on choice 2, and vice versa
+
+after bets are placed
+> ::closebets to disable adding bets
+
+after the results are in
+> ::choice1 or ::choice2 with NO arguments selects the winner
+    > if bets are closed and ::choice1 or ::choice2 is typed, then pay the winners, reset the pred
+
+Users.json
+> Stores user id and how much money they have
