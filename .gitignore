@@ -81,6 +81,9 @@ target/
 profile_default/
 ipython_config.py
 
+#Json Credentials
+GoogleCredentials.json
+
 # pyenv
 .python-version
 

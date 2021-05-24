@@ -8,6 +8,9 @@ name = "pypi"
 python-dotenv = "*"
 speechrecognition = "*"
 pynacl = "*"
+wheel = "*"
+pyaudio = {path = "./PyAudio-0.2.11-cp39-cp39-win_amd64.whl"}
+google-cloud-speech = "*"
 
 [dev-packages]
 
