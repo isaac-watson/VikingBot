@@ -3,23 +3,16 @@ import discord
 from discord.ext import commands
 import json
 import os
-from google.cloud.speech_v1.types.cloud_speech import RecognizeResponse
-import pyaudio
-import time
-from google.cloud import speech
-import speech_recognition as sr
+from gtts import gTTS
+from discord.ext.commands.core import command
 from dotenv import load_dotenv
+
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
-#credentials = service_account.Credentials.from_service_account_file('GoogleCredentials.json')
-client = speech.SpeechClient.from_service_account_json('GoogleCredentials.json')
 
-r = sr.Recognizer()
-CHUNK=2048
-FORMAT=pyaudio.paInt16
-CHANNELS=1
-RATE=16000
+
+
 
 bot = commands.Bot(command_prefix="$", description="A bot")
 
@@ -50,41 +43,16 @@ async def summon(ctx, *args):
             if (ctx.voice_client is None):
                 channel = bot.get_channel(channel_dict[args[0]])
                 await channel.connect()
-
-                p = pyaudio.PyAudio()
-                stream=p.open(
-                    format=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-                    channels=CHANNELS,
-                    rate=RATE,
-                    input=True,
-                    output=True,
-                    frames_per_buffer=CHUNK
-                )
-
-                config = speech.RecognitionConfig(
-                    encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-                    audio_channel_count=1,
-                    sample_rate_hertz=16000,
-                    language_code="en-US"
-                )
-
-                t_end = time.time() + 10
-
-                while time.time() < t_end:
-                    try:
-                        data=stream.read(CHUNK)
-                        ctx.voice_client.send_audio_packet(data, encode=False)
-                        print(data)
-                    except:
-                        print("failed to send audio packet")
-
                 
-                audio = speech.RecognitionAudio(content=data) 
-                response = client.recognize(config=config, audio=audio)
+            
+                guild = ctx.guild
+                voice_client: discord.VoiceClient = discord.utils.get(bot.voice_clients, guild=guild)
+                tts = gTTS('Walter is fucking retarded')
+                tts.save('BigGay.mp3')
 
-                for result in response.results:
-                    print("Transcript: {}".format(result.alternatives[0].transcript))
-
+                if not voice_client.is_playing():
+                    voice_client.play(discord.FFmpegPCMAudio('BigGay.mp3'), after=lambda e: print(f"Finished playing: {e}"))
+                
             else:
                 await ctx.voice_client.disconnect()
                 channel = bot.get_channel(channel_dict[args[0]])
@@ -106,6 +74,23 @@ async def banish(ctx):
 def find_emote(name):
     for emote in emotes:
         if (str(emote).find(name) != -1):
-            return str(emote)        
+            return str(emote)
+
+##TODO: Must complete function so it can accept user input fore the insult.
+# @bot.command()
+# async def insult(ctx, *args):     
+#     if (args == ()):
+#         #author = str(ctx.author)
+#         await ctx.send("Your an idiot " + ctx.message.author.mention)
+#     else:
+        
+        
+
+def speak(guild):
+    voice_client: discord.VoiceClient = discord.utils.get(bot.voice_clients, guild=guild)
+    tts = gTTS('Walter is fucking retarded')
+    tts.save('BigGay.mp3')
+    if not voice_client.is_playing():
+        voice_client.play(discord.FFmpegPCMAudio('BigGay.mp3'), after=lambda e: print(f"Finished playing: {e}"))
 
 bot.run(TOKEN)
