@@ -10,7 +10,7 @@ pynacl = "*"
 wheel = "*"
 gtts = "*"
 ffmpeg = "*"
-
+imageio = "*"
 
 [dev-packages]
 
