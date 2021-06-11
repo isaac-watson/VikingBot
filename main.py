@@ -126,7 +126,7 @@ async def speak(guild, msg, ctx):
     tts = gTTS(msg)
     tts.save('Content/text.mp3')
     if not voice_client.is_playing():
-        voice_client.play(discord.FFmpegPCMAudio('Content/text.mp3'), after= await leaveChat(ctx) )
+        voice_client.play(discord.FFmpegPCMAudio('Content/text.mp3'), after= print('done') )
 
 
 def getVoiceChatMembers(channel):

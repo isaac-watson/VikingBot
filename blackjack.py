@@ -2,8 +2,10 @@
 import time
 import random
 import discord
+import json
 from asyncio.windows_events import NULL
 from PIL import Image, ImageDraw, ImageFont
+from discord.ext.commands.converter import GameConverter
 
 cardArr = ["ClubsAce.png",
             "Clubs2.png",
@@ -57,6 +59,25 @@ cardArr = ["ClubsAce.png",
             "DiamondsJack.png",
             "DiamondsQueen.png",
             "DiamondsKing.png"]
+
+game_controls = {
+    "hit"        : "🔽",
+    "stay"       : "⏸",
+    "doubledown" : "⏬",
+    "quit"       : "⏹",
+    "playagain"  : "🔁",
+    25           : "⚪",
+    50           : "🔵",
+    100          : "🟤",
+    200          : "🟢",
+    500          : "🟣",
+    1000         : "🟡",
+    2000         : "🟠",
+    5000         : "🔴",
+    10000        : "⚫",
+    0.5          : "⬜",
+    0.0          : "⬛",
+}
 class Player:
     
     cardsDrawn = []
@@ -66,7 +87,8 @@ class Player:
         self.bBust = False
         self.bBlkJak = False
         self.bStay = False
-        self.val = [0,0] 
+        self.val = 0
+        self.bet = 0
 
 
     def randomCard(self):
@@ -75,48 +97,49 @@ class Player:
             self.randomCard()
         else:
             self.hand.append(cardArr[rnum])
-            self.__cardValue(cardArr[rnum])
+            self.__cardValue(self.hand)
             self.cardsDrawn.append(cardArr[rnum])
 
     def updateStay(self):
         self.bStay = True
     
     
-    def __cardValue(self, card):
-        if "Ace" in card:
-            self.val[0] += 1
-            self.val[1] += 11
-        elif "2" in card:
-            self.val[0] += 2
-            self.val[1] += 2
-        elif "3" in card:
-            self.val[0] += 3
-            self.val[1] += 3
-        elif "4" in card:
-            self.val[0] += 4
-            self.val[1] += 4
-        elif "5" in card:
-            self.val[0] += 5
-            self.val[1] += 5
-        elif "6" in card:
-            self.val[0] += 6
-            self.val[1] += 6
-        elif "7" in card:
-            self.val[0] += 7
-            self.val[1] += 7
-        elif "8" in card:
-            self.val[0] += 8
-            self.val[1] += 8
-        elif "9" in card:
-            self.val[0] += 9
-            self.val[1] += 9
-        else:
-            self.val[0] += 10
-            self.val[1] += 10
+    def __cardValue(self, hand):
+        self.val = 0
+        aces = 0
+        for card in hand:
+            if "Ace" in card:
+                aces += 1
+            elif "2" in card:
+                self.val += 2
+            elif "3" in card:
+                self.val += 3
+            elif "4" in card:
+                self.val += 4
+            elif "5" in card:
+                self.val += 5
+            elif "6" in card:
+                self.val += 6
+            elif "7" in card:
+                self.val += 7
+            elif "8" in card:
+                self.val += 8
+            elif "9" in card:
+                self.val += 9
+            else:
+                self.val += 10
+        
+        while aces > 0:
+            if self.val <= 10:
+                self.val += 11
+            else:
+                self.val += 1
+            
+            aces -= 1
 
-        if self.val[0] > 21 and self.val[1] > 21:
+        if self.val > 21:
             self.bBust = True
-        elif self.val[0] == 21 or self.val[1] == 21:
+        elif self.val == 21:
             self.bBlkJak = True
 
 async def startGame(bot, ctx):
@@ -124,47 +147,87 @@ async def startGame(bot, ctx):
     p1 = Player()
     dealer = Player()
 
-    p1.randomCard()
-    dealer.randomCard()
-    p1.randomCard()
-    dealer.randomCard()
+    msg = await ctx.send("""To place a bet refer to this table:
+                    \n⚪ = $25
+                    \n🔵 = $50
+                    \n🟤 = $100
+                    \n🟢 = $200
+                    \n🟣 = $500
+                    \n🟡 = $1000
+                    \n🟠 = $2000
+                    \n🔴 = $5000
+                    \n⚫ = $10000
+                    \n⬜ = 50% of bank
+                    \n⬛ = 100% of bank\n\n"""
+                   )
 
-    for card in p1.hand:
-        im2 = Image.open('Content/Cards/' + card)
-        Y = 386 - (p1.hand.index(card) * 15)
-        X = p1.hand.index(card) * 15
-        im.paste(im2.copy(), (X, Y))
-        im2.close()
-
-
-    for card in dealer.hand:
-        im2 = Image.open('Content/Cards/' + card)
-        Y = 25
-        X = 175 + dealer.hand.index(card) * 81
-        im.paste(im2.copy(), (X, Y))
-        im2.close()
+    for key in game_controls:
+        if (type(key) == float or type(key) == int):
+            await msg.add_reaction(game_controls[key])
     
-    draw = ImageDraw.Draw(im)
-    font = ImageFont.truetype("Content/alata-regular.ttf", 16)
-    draw.text((225, 0),"Dealer",(255,255,255),font=font)
-    draw.text((10, 480),"Player 1",(255,255,255),font=font)
-    im.save("Content/gamestate.png")
-    im.close()
+    while True:
+        reaction, user = await bot.wait_for('reaction_add', timeout=60.0)
+        if (user.bot == False): 
+            bet = get_key(reaction.emoji)
+            break
     
-    await ctx.send(file=discord.File('Content/gamestate.png'))
+    bet = place_bet(bet, user)
+    firstHand(p1, dealer, im)
+
+    msg = await ctx.send(file=discord.File('Content/gamestate.png'))
+    await printControls(msg)
 
     while (p1.bBlkJak == False and p1.bBust == False and p1.bStay == False):
-        reaction, user = await bot.wait_for('reaction_add', timeout=60.0)
-        if reaction.emoji.name == 'sadge':
-            hit(p1, dealer, "p1")
-            await ctx.send(file=discord.File('Content/gamestate.png'))
-        elif reaction.emoji.name == 'mattPoggers':
+        try:
+            reaction, user = await bot.wait_for('reaction_add', timeout=60.0)
+
+            if reaction.emoji == game_controls["hit"] and user.bot == False:
+                hit(p1, dealer, "p1")
+                await msg.delete()
+                msg = await ctx.send(file=discord.File('Content/gamestate.png'))
+                await printControls(msg)
+            elif reaction.emoji == game_controls["stay"] and user.bot == False:
+                stay(p1)
+            elif reaction.emoji == game_controls["doubledown"] and user.bot == False:
+                place_bet(bet, user)
+                hit(p1, dealer, "p1")
+                bet += bet
+                stay(p1)
+        except:
             stay(p1)
 
-    while(dealer.bBlkJak == False and dealer.bBust == False and dealer.val[0] < 17 and p1.bBust != True):
+    while(dealer.bBlkJak == False and dealer.bBust == False and dealer.val < 17 and p1.bBust != True):
         hit(p1, dealer, "dealer")
-        await ctx.send(file=discord.File('Content/gamestate.png'))
+        await msg.delete()
+        msg = await ctx.send(file=discord.File('Content/gamestate.png'))
         time.sleep(5)
+
+    if ((p1.bBlkJak == True and dealer.bBlkJak != False) or 
+        (p1.val > dealer.val and p1.bBust == False)):
+        await winnings(bet, user, ctx)
+    elif p1.val == dealer.val:
+        bet /= 2
+        await winnings(bet, user, ctx)
+    else:
+        bet = 0
+        await winnings(bet, user, ctx)
+    
+
+
+    await msg.add_reaction(game_controls["playagain"])
+    await msg.add_reaction(game_controls["quit"])
+
+    try:
+        while True:
+            reaction, user = await bot.wait_for('reaction_add', timeout=60.0)
+            if reaction.emoji == game_controls["playagain"] and user.bot == False:
+                await startGame(bot, ctx)
+                break
+            elif reaction.emoji == game_controls["quit"] and user.bot == False:
+                await ctx.send("Thanks for Playing")
+                break
+    except:
+        await ctx.send("Thanks for Playing")
 
 def hit(p1, dealer, who):
     im = Image.open('Content/gamestate.png')
@@ -194,3 +257,74 @@ def hit(p1, dealer, who):
 def stay(player):
     player.updateStay()
 
+async def printControls(msg):
+    await msg.add_reaction(game_controls["hit"])
+    await msg.add_reaction(game_controls["stay"])
+    await msg.add_reaction(game_controls["doubledown"])
+
+def firstHand(p1, dealer, im):
+    p1.randomCard()
+    dealer.randomCard()
+    p1.randomCard()
+    dealer.randomCard()
+
+    for card in p1.hand:
+        im2 = Image.open('Content/Cards/' + card)
+        Y = 386 - (p1.hand.index(card) * 15)
+        X = p1.hand.index(card) * 15
+        im.paste(im2.copy(), (X, Y))
+        im2.close()
+
+
+    for card in dealer.hand:
+        im2 = Image.open('Content/Cards/' + card)
+        Y = 25
+        X = 175 + dealer.hand.index(card) * 81
+        im.paste(im2.copy(), (X, Y))
+        im2.close()
+
+    draw = ImageDraw.Draw(im)
+    font = ImageFont.truetype("Content/alata-regular.ttf", 16)
+    draw.text((225, 0),"Dealer",(255,255,255),font=font)
+    draw.text((10, 480),"Player 1",(255,255,255),font=font)
+    im.save("Content/gamestate.png")
+    im.close()
+
+def get_key(val):
+    for key, value in game_controls.items():
+         if val == value:
+             return key
+
+def place_bet(bet, user):
+    with open("users.json", "r") as f:
+        users = json.load(f)
+
+    with open("users.json", "w") as f:
+        user_id = str(user.id)
+        if (type(bet) == int):
+            if (users[user_id]["money"] >= bet):
+                users[user_id]["money"] = users[user_id]["money"] - bet
+            else:
+                bet = users[user_id]["money"]
+                users[user_id]["money"] = 0
+        else:
+            if bet == 0.0:
+                bet = users[user_id]["money"]
+                users[user_id]["money"] = 0
+            else:
+                bet = users[user_id]["money"] / 2
+                users[user_id]["money"] = users[user_id]["money"] / 2
+        
+        json.dump(users, f)
+    
+    return bet
+
+async def winnings(bet, user, ctx):
+    with open("users.json", "r") as f:
+        users = json.load(f)
+
+    with open("users.json", "w") as f:
+        user_id = str(user.id)
+        users[user_id]["money"] += (bet * 2)
+        await ctx.send('Current Bank: $' + str(users[user_id]["money"]))
+        json.dump(users, f)
