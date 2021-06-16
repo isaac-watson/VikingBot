@@ -68,7 +68,7 @@ async def insult(ctx, *args):
             await joinChat(ctx, 'general')
 
             if ((target in members) and (len(args) != 2)):
-                await speak(ctx.guild, (target + ' is Big Gay'), ctx)
+                await speak(ctx.guild, (target + ' is Stupid'), ctx)
             else:
                 await speak(ctx.guild, args[1], ctx)
             
@@ -93,7 +93,7 @@ async def E (ctx):
 
 @bot.command()
 async def BJ(ctx, *arg):
-    await blackjack.startGame(bot, ctx)
+    await blackjack.startGame(bot, ctx, arg[0])
 
 async def getMembers(ctx):
     memberList = []
