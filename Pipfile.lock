@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "a3165724377b11f87723fb696e2108cc4d73b8b46f6a7f0ee5829ec1be9801e5"
+            "sha256": "6478890972a209fe4a1e1ce95dfe98ce697303d27342b4514855da6547461f84"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -160,13 +160,21 @@
             "markers": "platform_system == 'Windows'",
             "version": "==0.4.4"
         },
-        "discord.py": {
+        "discord": {
             "hashes": [
-                "sha256:114e76cd27362fb919abf7f001a2dbdc77c9a67cff74ed6a89aecd6582ee298e",
-                "sha256:f179db299c949a8cf0a12c1b1b94d0da9a18e088857154d93ae5ab1d807ec61d"
+                "sha256:9d4debb4a37845543bd4b92cb195bc53a302797333e768e70344222857ff1559",
+                "sha256:ff6653655e342e7721dfb3f10421345fd852c2a33f2cca912b1c39b3778a9429"
             ],
             "index": "pypi",
-            "version": "==1.7.2"
+            "version": "==1.0.1"
+        },
+        "discord.py": {
+            "hashes": [
+                "sha256:462cd0fe307aef8b29cbfa8dd613e548ae4b2cb581d46da9ac0d46fb6ea19408",
+                "sha256:c6f64db136de0e18e090f6752ea68bdd4ab0a61b82dfe7acecefa22d6477bb0c"
+            ],
+            "index": "pypi",
+            "version": "==1.7.3"
         },
         "ffmpeg": {
             "hashes": [
@@ -177,11 +185,11 @@
         },
         "gtts": {
             "hashes": [
-                "sha256:10efdecde4e272dee48ef0e8aa217de7f0bd5f914c368a92a6a14edbc0cd9cff",
-                "sha256:b53714d8377afb66df9f112158a6a832de26bc72cee3b8af321575d85f820a0f"
+                "sha256:8376d9bde85ac8cda95ea92dcd12bf31a3efe9e810edcb04437a4151cbec30d6",
+                "sha256:88cfaa112471867009a0450a696e5bc69cf1671fa0fa683fe17d0650023c863c"
             ],
             "index": "pypi",
-            "version": "==2.2.2"
+            "version": "==2.2.3"
         },
         "idna": {
             "hashes": [
@@ -308,11 +316,11 @@
         },
         "python-dotenv": {
             "hashes": [
-                "sha256:00aa34e92d992e9f8383730816359647f358f4a3be1ba45e5a5cefd27ee91544",
-                "sha256:b1ae5e9643d5ed987fc57cc2583021e38db531946518130777734f9589b3141f"
+                "sha256:dd8fe852847f4fbfadabf6183ddd4c824a9651f02d51714fa075c95561959c7d",
+                "sha256:effaac3c1e58d89b3ccb4d04a40dc7ad6e0275fda25fd75ae9d323e2465e202d"
             ],
             "index": "pypi",
-            "version": "==0.17.1"
+            "version": "==0.18.0"
         },
         "requests": {
             "hashes": [

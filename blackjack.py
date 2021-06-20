@@ -80,6 +80,7 @@ game_controls = {
     0.5          : "⬜",
     0.0          : "⬛",
 }
+
 class Player:
     
     cardsDrawn = []
@@ -233,7 +234,7 @@ async def startGame(bot, ctx, arg):
 
     #Main black jack player loop, allows the player to hit, stay or double down until they bust
     for player in p:
-        while (p1.bBlkJak == False and player.bBust == False and player.bStay == False):
+        while (player.bBlkJak == False and player.bBust == False and player.bStay == False):
             try:
                 await ctx.send("Player " + str(p.index(player) + 1) +  " Turn")
                 reaction, user = await bot.wait_for('reaction_add', timeout=60.0)
@@ -297,7 +298,7 @@ async def startGame(bot, ctx, arg):
     await msg.add_reaction(game_controls["playagain"])
     await msg.add_reaction(game_controls["quit"])
 
-    p[0].cardsDrawn = [];
+    p[0].cardsDrawn = []
 
     try:
         while True:
